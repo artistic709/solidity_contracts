@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.15;
 contract guessnumber {
 	// of course it's a useless contract
 	address owner;
@@ -9,12 +9,12 @@ contract guessnumber {
 
 	function guessnumber(){
 		owner=msg.sender;
-		name="guessnumbercoin"
+		name="guessnumbercoin";
 	}
 	
 	// create a four-digit random number
 	function start() returns (bool){
-		require(activated[msg.sender]==0);
+		require(activated[msg.sender]==false);
 
 		uint seed = block.timestamp+block.difficulty+block.number;
 		
@@ -29,7 +29,7 @@ contract guessnumber {
 				}
 			}
 		}
-		activated[msg.sender]=1;
+		activated[msg.sender]=true;
 		return true;
 	}
 
@@ -38,10 +38,10 @@ contract guessnumber {
 	// B = count of numbers that exist but at a wrong place
 	// eg: if the answer is 1234, then 3254 = 2A1B
 	function guess(uint _answer) constant returns(uint A,uint B){
-		require(activated[msg.sender]==1);
+		require(activated[msg.sender]==true);
 		require(_answer<=9876);
 		require(_answer>=1234);
-		uint guessanswer[4];
+		uint[] memory guessanswer = new uint[](4);
 		uint a=0;
 		uint b=0;
 		for(uint i=0;i<4;i++){
@@ -63,10 +63,10 @@ contract guessnumber {
 
 	// submit the correct answer to win a coin 
 	function submit(uint _answer) returns(bool success){
-		require(activated[msg.sender]==1);
+		require(activated[msg.sender]==true);
 		require(_answer<=9876);
 		require(_answer>=1234);
-		uint guessanswer[4];
+		uint[] memory guessanswer = new uint[](4);
 		for(uint i=0;i<4;i++){
 			guessanswer[i]=(_answer % (10**(i+1)))/(10**i);
 		}
@@ -77,7 +77,7 @@ contract guessnumber {
 		}
 		coinBalance[msg.sender]+=1;
 
-		activated[msg.sender]=0;
+		activated[msg.sender]=false;
 		return true;
 	}
 
