@@ -90,8 +90,8 @@ contract guessnumber {
 	// A = count of digits that meet the right number
 	// B = count of numbers that exist but at a wrong place
 	// eg: if the answer is 1234, then 3254 = 2A1B
-	function guess(uint _answer) constant returns(uint A,uint B){
-		require(activated[msg.sender]==true);
+	function guess(address player,uint _answer) constant returns(uint A,uint B){
+		require(activated[player]==true);
 		require(_answer<=9876);
 		require(_answer>=1234);
 		uint[] memory guessanswer = new uint[](4);
@@ -101,11 +101,11 @@ contract guessnumber {
 			guessanswer[i]=(_answer % (10**(i+1)))/(10**i);
 		}
 		for(uint j=0;j<4;++j){
-			if(guessanswer[j]==answer[msg.sender][j]){
+			if(guessanswer[j]==answer[player][j]){
 				a+=1;
 			}
 			for(uint k=0;k<4;++k){
-				if(guessanswer[k]==answer[msg.sender][j]){
+				if(guessanswer[k]==answer[player][j]){
 					b+=1;
 				}
 			}
