@@ -76,7 +76,7 @@ contract guessnumber {
 			answer[msg.sender][i]=(seed % (10**(i+1)))/(10**i);
 
 			for(uint j=0;j<i;j++){
-				if(answer[msg.sender][i]==answer[msg.sender][j]){
+				if(answer[msg.sender][i]==answer[msg.sender][j]||answer[msg.sender][i]==0){
 					answer[msg.sender][i]=(answer[msg.sender][i]+7)%10;
 					j=0;
 				}
