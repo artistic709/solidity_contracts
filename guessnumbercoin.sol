@@ -70,17 +70,16 @@ contract guessnumber {
 		require(activated[msg.sender]==false);
 
 		uint seed = block.timestamp+block.difficulty+block.number;
-		
+		bool[] memory used = new bool[](9);
 		for (uint i=0;i<4;i++){
+            uint x=seed%9;
+            seed/=10;
+            while(used[x]==true){
+                x=(x+4)%9;
+            }
+            used[x]=true;
+			answer[msg.sender][i]=x+1;
 
-			answer[msg.sender][i]=(seed % (10**(i+1)))/(10**i);
-
-			for(uint j=0;j<i;j++){
-				if(answer[msg.sender][i]==answer[msg.sender][j]||answer[msg.sender][i]==0){
-					answer[msg.sender][i]=(answer[msg.sender][i]+7)%10;
-					j=0;
-				}
-			}
 		}
 		activated[msg.sender]=true;
 		return true;
@@ -92,13 +91,13 @@ contract guessnumber {
 	// eg: if the answer is 1234, then 3254 = 2A1B
 	function guess(address player,uint _answer) constant returns(uint A,uint B){
 		require(activated[player]==true);
-		require(_answer<=9876);
-		require(_answer>=1234);
+
 		uint[] memory guessanswer = new uint[](4);
 		uint a=0;
 		uint b=0;
 		for(uint i=0;i<4;i++){
-			guessanswer[i]=(_answer % (10**(i+1)))/(10**i);
+			guessanswer[i]=_answer%10;
+			_answer/=10;
 		}
 		for(uint j=0;j<4;++j){
 			if(guessanswer[j]==answer[player][j]){
@@ -117,11 +116,11 @@ contract guessnumber {
 	// submit the correct answer to win a coin 
 	function submit(uint _answer) returns(bool success){
 		require(activated[msg.sender]==true);
-		require(_answer<=9876);
-		require(_answer>=1234);
+
 		uint[] memory guessanswer = new uint[](4);
 		for(uint i=0;i<4;i++){
-			guessanswer[i]=(_answer % (10**(i+1)))/(10**i);
+			guessanswer[i]=_answer%10;
+			_answer/=10;
 		}
 		for(uint j=0;j<4;j++){
 			if(guessanswer[j]!=answer[msg.sender][j]){
