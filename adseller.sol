@@ -14,7 +14,7 @@ contract adseller {
     
     function adseller(){
         owner=msg.sender;
-        bidDueTime=now+1 minutes;
+        bidDueTime=now+1 weeks;
         marginRatio=5;
     }
     
@@ -23,14 +23,14 @@ contract adseller {
             return false;
         }
         else{
-            bidDueTime+= 1 minutes;
+            bidDueTime+= 1 weeks;
             address redeemaddress = currentAdOwner;
-            uint256 redeemvalue = currentAdValue/(marginRatio+1);
+            uint256 redeemvalue = marginRatio*currentAdValue/(marginRatio+1);
             
             currentAdValue = highestBid;
             currentAdContent = nextAdContent;
             currentAdOwner = nextAdOwner;
-            nextAdContent = "0";
+            nextAdContent = "-";
             nextAdOwner = 0x0;
             highestBid = 0;
             redeemaddress.transfer(redeemvalue);
@@ -39,10 +39,11 @@ contract adseller {
     }
     
     function bid(string ad) payable returns(bool success){
+
         if(bidDueTime<now){
             gotoNext();
         }
-        if(msg.value<=highestBid){
+        if(msg.value*105<=100*highestBid){
             revert();
             return false;
         }
@@ -54,6 +55,7 @@ contract adseller {
             highestBid = msg.value;
             if(redeemaddress!=0x0)
                 redeemaddress.transfer(redeemvalue);
+            
             return true;
         }
         
@@ -62,14 +64,14 @@ contract adseller {
     function judge() returns(bool success){
         require(msg.sender==owner);
         currentAdValue = 0;
-        currentAdContent = "0";
+        currentAdContent = "-";
         currentAdOwner = 0x0;
         return true;
     }
     
     function collect() returns(bool success){
         require(msg.sender==owner);
-        owner.transfer(this.balance-currentAdValue/(marginRatio+1));
+        owner.transfer(this.balance-currentAdValue);
         return true;
     }
     
