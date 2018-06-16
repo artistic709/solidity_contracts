@@ -116,10 +116,8 @@ contract ERC20Token is Ownable, ERC20Interface {
 contract CryptoCow is ERC20Token{
   using SafeMath for uint256;
 
-  uint256 constant PSN=1642182;
-  uint256 constant PSNH=821091;
-  address public ceoAddress;
-  uint256 public marketEggs;
+  uint256 constant doubleC8763=1642182;
+  uint256 constant C8763=821091;
   function CryptoCow(uint256 initialSupply,string _name, string _symbol, uint8 _decimals) public payable{
     totalSupply = initialSupply;
     balances[0xbeef] = initialSupply;
@@ -133,8 +131,9 @@ contract CryptoCow is ERC20Token{
   event Award(address awardee,uint256 amount);
 
   function award(address _awardee,uint256 _amount)public onlyOwner{
-    totalSupply=totalSupply.add(_amount);
     balances[_awardee]=balances[_awardee].add(_amount);
+    balances[0xbeef]=balances[0xbeef].add(_amount.div(10));
+    totalSupply=totalSupply.add(_amount.mul(11).div(10));
     emit Award(_awardee,_amount);
   }
 
@@ -148,11 +147,10 @@ contract CryptoCow is ERC20Token{
     uint256 tokenBought=calculateTokenBuy(msg.value,SafeMath.sub(this.balance,msg.value));
     _transfer(0xbeef,msg.sender,tokenBought);
   }
-  //model stoled from EtherShrimpFarm
+  //model stole from EtherShrimpFarm
   function calculateTrade(uint256 rt,uint256 rs, uint256 bs) public pure returns(uint256){
-    //(PSN*bs)/(PSNH+((PSN*rs+PSNH*rt)/rt));
-    //PSN.mul(bs).div(PSNH.add(PSN.mul(rs).add(PSNH.mul(rt)).div(rt)))
-    return SafeMath.div(SafeMath.mul(PSN,bs),SafeMath.add(PSNH,SafeMath.div(SafeMath.add(SafeMath.mul(PSN,rs),SafeMath.mul(PSNH,rt)),rt)));
+    //(doubleC8763*bs)/(C8763+((doubleC8763*rs+C8763*rt)/rt));
+    return doubleC8763.mul(bs).div(C8763.add(doubleC8763.mul(rs).add(C8763.mul(rt)).div(rt)));
   }
   function calculateTokenSell(uint256 eggs) public view returns(uint256){
     return calculateTrade(eggs,balances[0xbeef],this.balance);
@@ -165,5 +163,8 @@ contract CryptoCow is ERC20Token{
   }
   function getBalance() public view returns(uint256){
     return this.balance;
+  }
+  function poolTokenBalance()public view returns(uint256){
+    return balances[0xbeef];
   }
 }
