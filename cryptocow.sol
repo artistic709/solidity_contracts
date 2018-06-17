@@ -144,7 +144,7 @@ contract CryptoCow is ERC20Token{
   }
 
   function buyToken() public payable{
-    uint256 tokenBought=calculateTokenBuy(msg.value,SafeMath.sub(this.balance,msg.value));
+    uint256 tokenBought=calculateTokenBuy(msg.value,this.balance.sub(msg.value));
     _transfer(0xbeef,msg.sender,tokenBought);
   }
   //model stole from EtherShrimpFarm
@@ -152,8 +152,8 @@ contract CryptoCow is ERC20Token{
     //(doubleC8763*bs)/(C8763+((doubleC8763*rs+C8763*rt)/rt));
     return doubleC8763.mul(bs).div(C8763.add(doubleC8763.mul(rs).add(C8763.mul(rt)).div(rt)));
   }
-  function calculateTokenSell(uint256 eggs) public view returns(uint256){
-    return calculateTrade(eggs,balances[0xbeef],this.balance);
+  function calculateTokenSell(uint256 amount) public view returns(uint256){
+    return calculateTrade(amount,balances[0xbeef],this.balance);
   }
   function calculateTokenBuy(uint256 eth,uint256 contractBalance) public view returns(uint256){
     return calculateTrade(eth,contractBalance,balances[0xbeef]);
