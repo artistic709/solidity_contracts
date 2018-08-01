@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 library SafeMath {
 
@@ -38,7 +38,7 @@ contract Ownable {
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() public {
+  constructor() public {
     owner = msg.sender;
   }
   /**
@@ -75,6 +75,11 @@ contract ERC20Interface {
   function transferFrom(address from, address to, uint256 value) public returns (bool);
   function approve(address spender, uint256 value) public returns (bool);
   event Approval(address indexed owner, address indexed spender, uint256 value);
+  
+}
+
+contract ApproveAndCallFallBack {
+  function receiveApproval(address from, uint256 value, address token, bytes data) public;
 }
 
 contract ERC20Token is Ownable, ERC20Interface {
@@ -111,23 +116,39 @@ contract ERC20Token is Ownable, ERC20Interface {
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     return _transfer(_from,_to,_value);
   }
+
+  event Burn(address indexed from, uint256 value);
+
+  function burnFrom(address _from, uint _value) public returns (bool) {
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    emit Burn(_from, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint _value, bytes data) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    emit Approval(msg.sender, _spender, _value);
+    ApproveAndCallFallBack(_spender).receiveApproval(msg.sender, _value, this, data);
+    return true;
+  }
 }
 
 contract CryptoCow is ERC20Token{
   using SafeMath for uint256;
 
-  uint256 constant doubleC8763=1642182;
-  uint256 constant C8763=821091;
-  function CryptoCow(uint256 initialSupply,string _name, string _symbol, uint8 _decimals) public payable{
+  uint256 constant _190EC6=1642182;
+  uint256 constant _C8763=821091;
+  constructor(uint256 initialSupply) public payable{
     totalSupply = initialSupply;
     balances[0xbeef] = initialSupply;
-    name = _name;
-    symbol = _symbol;
-    decimals = _decimals;
+    name = "CryptoCow";
+    symbol = "COW";
+    decimals = 18;
   }
   function ()public payable{
-    buyToken();
   }
+
   event Award(address awardee,uint256 amount);
 
   function award(address _awardee,uint256 _amount)public onlyOwner{
@@ -140,17 +161,19 @@ contract CryptoCow is ERC20Token{
   function selltoken(uint256 _amount) public{
     uint256 tokenValue = calculateTokenSell(_amount);
     _transfer(msg.sender,0xbeef,_amount);
+    tokenValue = tokenValue.sub(tokenValue.div(40));
     msg.sender.transfer(tokenValue);
   }
 
   function buyToken() public payable{
     uint256 tokenBought=calculateTokenBuy(msg.value,this.balance.sub(msg.value));
+    tokenBought = tokenBought.sub(tokenBought.div(40));
     _transfer(0xbeef,msg.sender,tokenBought);
   }
-  //model stole from EtherShrimpFarm
+  //magic formula from EtherShrimpFarm
   function calculateTrade(uint256 rt,uint256 rs, uint256 bs) public pure returns(uint256){
-    //(doubleC8763*bs)/(C8763+((doubleC8763*rs+C8763*rt)/rt));
-    return doubleC8763.mul(bs).div(C8763.add(doubleC8763.mul(rs).add(C8763.mul(rt)).div(rt)));
+    //(_190EC6*bs)/(_C8763+((_190EC6*rs+_C8763*rt)/rt));
+    return _190EC6.mul(bs).div(_C8763.add(_190EC6.mul(rs).add(_C8763.mul(rt)).div(rt)));
   }
   function calculateTokenSell(uint256 amount) public view returns(uint256){
     return calculateTrade(amount,balances[0xbeef],this.balance);
@@ -166,5 +189,8 @@ contract CryptoCow is ERC20Token{
   }
   function poolTokenBalance()public view returns(uint256){
     return balances[0xbeef];
+  }
+  function transferAnyERC20Token(address tokenAddress, uint _value) public onlyOwner returns (bool success) {
+    return ERC20Interface(tokenAddress).transfer(owner, _value);
   }
 }
