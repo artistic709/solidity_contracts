@@ -91,7 +91,7 @@ contract ERC20Token is Ownable, ERC20Interface {
   function balanceOf(address _owner) public view returns (uint256){
     return balances[_owner];
   }
-  function _transfer(address _from,address _to,uint256 _value)internal returns(bool){
+  function _transfer(address _from, address _to, uint256 _value) internal returns (bool) {
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
     emit Transfer(_from, _to, _value);
@@ -114,14 +114,14 @@ contract ERC20Token is Ownable, ERC20Interface {
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     require(msg.sender != _from);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-    return _transfer(_from,_to,_value);
+    return _transfer(_from, _to, _value);
   }
 
   event Burn(address indexed from, uint256 value);
 
   function burnFrom(address _from, uint _value) public returns (bool) {
-    balances[_from] = balances[_from].sub(_value);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_from] = balances[_from].sub(_value);
     totalSupply = totalSupply.sub(_value);
     emit Burn(_from, _value);
     return true;
@@ -137,8 +137,8 @@ contract ERC20Token is Ownable, ERC20Interface {
 contract CryptoCow is ERC20Token{
   using SafeMath for uint256;
 
-  uint256 constant _190EC6=1642182;
-  uint256 constant _C8763=821091;
+  uint256 constant _190EC6 = 1642182;
+  uint256 constant _C8763 = 821091;
   constructor(uint256 initialSupply) public payable{
     totalSupply = initialSupply;
     balances[0xbeef] = initialSupply;
@@ -146,48 +146,48 @@ contract CryptoCow is ERC20Token{
     symbol = "COW";
     decimals = 18;
   }
-  function ()public payable{
+  function () public payable{
   }
 
-  event Award(address awardee,uint256 amount);
+  event Award(address indexed awardee, uint256 amount);
 
-  function award(address _awardee,uint256 _amount)public onlyOwner{
-    balances[_awardee]=balances[_awardee].add(_amount);
-    balances[0xbeef]=balances[0xbeef].add(_amount.div(10));
-    totalSupply=totalSupply.add(_amount.mul(11).div(10));
-    emit Award(_awardee,_amount);
+  function award(address _awardee, uint256 _amount) public onlyOwner {
+    balances[_awardee] = balances[_awardee].add(_amount);
+    balances[0xbeef] = balances[0xbeef].add(_amount.div(10));
+    totalSupply = totalSupply.add(_amount.mul(11).div(10));
+    emit Award(_awardee, _amount);
   }
 
-  function selltoken(uint256 _amount) public{
+  function selltoken(uint256 _amount) public {
     uint256 tokenValue = calculateTokenSell(_amount);
-    _transfer(msg.sender,0xbeef,_amount);
+    _transfer(msg.sender, 0xbeef, _amount);
     tokenValue = tokenValue.sub(tokenValue.div(40));
     msg.sender.transfer(tokenValue);
   }
 
-  function buyToken() public payable{
-    uint256 tokenBought=calculateTokenBuy(msg.value,this.balance.sub(msg.value));
+  function buyToken() public payable {
+    uint256 tokenBought = calculateTokenBuy(msg.value, address(this).balance.sub(msg.value));
     tokenBought = tokenBought.sub(tokenBought.div(40));
-    _transfer(0xbeef,msg.sender,tokenBought);
+    _transfer(0xbeef, msg.sender, tokenBought);
   }
   //magic formula from EtherShrimpFarm
-  function calculateTrade(uint256 rt,uint256 rs, uint256 bs) public pure returns(uint256){
+  function calculateTrade(uint256 rt, uint256 rs, uint256 bs) public pure returns (uint256) {
     //(_190EC6*bs)/(_C8763+((_190EC6*rs+_C8763*rt)/rt));
     return _190EC6.mul(bs).div(_C8763.add(_190EC6.mul(rs).add(_C8763.mul(rt)).div(rt)));
   }
-  function calculateTokenSell(uint256 amount) public view returns(uint256){
-    return calculateTrade(amount,balances[0xbeef],this.balance);
+  function calculateTokenSell(uint256 amount) public view returns (uint256) {
+    return calculateTrade(amount, balances[0xbeef], address(this).balance);
   }
-  function calculateTokenBuy(uint256 eth,uint256 contractBalance) public view returns(uint256){
-    return calculateTrade(eth,contractBalance,balances[0xbeef]);
+  function calculateTokenBuy(uint256 eth, uint256 contractBalance) public view returns (uint256) {
+    return calculateTrade(eth, contractBalance, balances[0xbeef]);
   }
-  function calculateTokenBuySimple(uint256 eth) public view returns(uint256){
-    return calculateTokenBuy(eth,this.balance);
+  function calculateTokenBuySimple(uint256 eth) public view returns (uint256) {
+    return calculateTokenBuy(eth, address(this).balance);
   }
-  function getBalance() public view returns(uint256){
-    return this.balance;
+  function getBalance() public view returns (uint256) {
+    return address(this).balance;
   }
-  function poolTokenBalance()public view returns(uint256){
+  function poolTokenBalance() public view returns (uint256) {
     return balances[0xbeef];
   }
   function transferAnyERC20Token(address tokenAddress, uint _value) public onlyOwner returns (bool success) {
