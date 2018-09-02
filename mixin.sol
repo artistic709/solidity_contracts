@@ -61,6 +61,45 @@ contract tokenMixin {
         
 }
 
+contract etherMixin {
+    using SafeMath for uint256;
+    mapping(address => uint256) public balanceOf;
+
+
+    function deposit(uint256 _value) public payable {
+        address _from = msg.sender;
+        balanceOf[_from] = balanceOf[_from].add(msg.value);
+    }
+    function withdraw(uint256 _value) public {
+        address _to = msg.sender;
+        balanceOf[_to] = balanceOf[_to].sub(_value);
+        _to.transfer(_value);
+    }
+
+    function mix (address[] from, address[] to, uint256[] out, uint256[] _in, uint8[] v,bytes32[] r,bytes32[] s) public {
+        
+        uint256 totalOut;
+        uint256 totalIn;
+
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+        bytes32 digest = keccak256(from, to, out, _in,address(this));
+        bytes32 txHash = keccak256(prefix,digest);
+
+        for (uint256 i = 0; i < from.length; i++){
+            require(ecrecover(txHash,v[i],r[i],s[i]) == from[i]);
+        }
+        for (uint256 i = 0; i < from.length; i++){
+            balanceOf[from[i]] = balanceOf[from[i]].sub(out[i]);
+            totalOut = totalOut.add(out[i]);
+        }
+        for(uint256 i = 0; i < to.length; i++){
+            balanceOf[to[i]] = balanceOf[to[i]].sub(_in[i]);
+            totalIn = totalIn.add(out[i]);
+        }
+        require(totalIn == totalOut);
+    }
+    
+}
 
 
 library SafeMath {
