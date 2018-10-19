@@ -1,4 +1,4 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.24;
 
 contract proxy {
 
@@ -12,9 +12,11 @@ contract proxy {
     require(msg.sender == owner);
     _;
   }
-
+  
+  event Execute(address to,uint value,bytes data);
   function execute(address to,uint value,bytes data) public onlyOwner{
     to.call.value(value)(data);
+    emit Execute(to, value, data);
   }
   
   function ()public payable{
