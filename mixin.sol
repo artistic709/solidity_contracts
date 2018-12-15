@@ -55,7 +55,7 @@ contract tokenMixin {
         }
         for(i = 0; i < to.length; i++){
             address t =to[i];
-            balanceOf[t] = balanceOf[t].sub(_in[i]);
+            balanceOf[t] = balanceOf[t].add(_in[i]);
             totalIn = totalIn.add(out[i]);
         }
         require(totalIn == totalOut);
@@ -97,7 +97,7 @@ contract etherMixin {
         }
         for(i = 0; i < to.length; i++){
             address t = to[i];
-            balanceOf[t] = balanceOf[t].sub(_in[i]);
+            balanceOf[t] = balanceOf[t].add(_in[i]);
             totalIn = totalIn.add(out[i]);
         }
         require(totalIn == totalOut);
