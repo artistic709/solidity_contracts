@@ -40,7 +40,10 @@ contract tokenMixin {
         
         uint256 totalOut;
         uint256 totalIn;
-
+        
+        require(from.length == out.length);
+        require(to.length == _in.length);
+        
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 digest = keccak256(abi.encodePacked(from, to, out, _in,address(this)));
         bytes32 txHash = keccak256(abi.encodePacked(prefix,digest));
@@ -82,6 +85,9 @@ contract etherMixin {
         
         uint256 totalOut;
         uint256 totalIn;
+        
+        require(from.length == out.length);
+        require(to.length == _in.length);
 
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 digest = keccak256(abi.encodePacked(from, to, out, _in,address(this)));
