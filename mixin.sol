@@ -19,6 +19,8 @@ contract tokenMixin {
 
     function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) external{
         require(msg.sender == tokenAddress);
+        require(_token == tokenAddress);
+        _extraData;
         require(token.transferFrom(_from,address(this),_value));
         balanceOf[_from] = balanceOf[_from].add(_value);
 
@@ -40,8 +42,8 @@ contract tokenMixin {
         uint256 totalIn;
 
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 digest = keccak256(from, to, out, _in,address(this));
-        bytes32 txHash = keccak256(prefix,digest);
+        bytes32 digest = keccak256(abi.encodePacked(from, to, out, _in,address(this)));
+        bytes32 txHash = keccak256(abi.encodePacked(prefix,digest));
 
         for (uint256 i = 0; i < from.length; i++){
             require(ecrecover(txHash,v[i],r[i],s[i]) == from[i]);
@@ -66,7 +68,7 @@ contract etherMixin {
     mapping(address => uint256) public balanceOf;
 
 
-    function deposit(uint256 _value) public payable {
+    function deposit() public payable {
         address _from = msg.sender;
         balanceOf[_from] = balanceOf[_from].add(msg.value);
     }
@@ -82,18 +84,20 @@ contract etherMixin {
         uint256 totalIn;
 
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 digest = keccak256(from, to, out, _in,address(this));
-        bytes32 txHash = keccak256(prefix,digest);
+        bytes32 digest = keccak256(abi.encodePacked(from, to, out, _in,address(this)));
+        bytes32 txHash = keccak256(abi.encodePacked(prefix,digest));
 
         for (uint256 i = 0; i < from.length; i++){
             require(ecrecover(txHash,v[i],r[i],s[i]) == from[i]);
         }
-        for (uint256 i = 0; i < from.length; i++){
-            balanceOf[from[i]] = balanceOf[from[i]].sub(out[i]);
+        for (i = 0; i < from.length; i++){
+            address f = from[i];
+            balanceOf[f] = balanceOf[f].sub(out[i]);
             totalOut = totalOut.add(out[i]);
         }
-        for(uint256 i = 0; i < to.length; i++){
-            balanceOf[to[i]] = balanceOf[to[i]].sub(_in[i]);
+        for(i = 0; i < to.length; i++){
+            address t = to[i];
+            balanceOf[t] = balanceOf[t].sub(_in[i]);
             totalIn = totalIn.add(out[i]);
         }
         require(totalIn == totalOut);
