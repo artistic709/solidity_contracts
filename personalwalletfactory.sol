@@ -48,6 +48,17 @@ contract personalWallet {
         emit Execute(_to, _value, _data);
     }
 
+    function batchExecute(
+        address[] _to, uint256[] _value,
+        uint256[] _idx, bytes _data) public onlyOwner {
+        uint256 start = 0;
+        for (uint256 i = 0; i < _idx.length; i++) {
+            require(_to[i].call.value(_value[i])(_data.slice(start, _idx[i])));
+            emit Execute(_to[i], _value[i], _data.slice(start, _idx[i]));
+            start += _idx[i];
+        }
+    }
+
     function delegateExecute(
         address _to, uint256 _value,
         bytes _data, uint256 _nonce,
