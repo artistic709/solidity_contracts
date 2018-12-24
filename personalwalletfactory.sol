@@ -13,11 +13,11 @@ contract personalWallet {
         recovery = _recovery;
     }
 
-    function isOwner(address _owner) public view returns(bool){
+    function isOwner(address _owner) public view returns(bool) {
         return(_owner == owner);
     }
 
-    function owners() public view returns(address[] memory _owners){
+    function owners() public view returns(address[] memory _owners) {
         _owners = new address[](1);
         _owners[0] = owner;
     }
@@ -32,11 +32,11 @@ contract personalWallet {
         _;
     }
 
-    function setOwner(address _owner) onlyRecovery external{
+    function setOwner(address _owner) onlyRecovery external {
         owner = _owner;
     }
 
-    function setRecovery(address _recovery) onlyRecovery external{
+    function setRecovery(address _recovery) onlyRecovery external {
         recovery = _recovery;
     }
 
@@ -94,9 +94,9 @@ contract personalWallet {
             start += _idx[i];
         }
         nonce = nonce + 1;
-  }
+    }
 
-    function () public payable{
+    function () public payable {
     }
 
 }
