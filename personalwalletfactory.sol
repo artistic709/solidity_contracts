@@ -53,6 +53,7 @@ contract personalWallet {
         bytes _data, uint256 _nonce,
         uint8 _v, bytes32 _r, bytes32 _s) public {
 
+        require(_nonce == nonce);
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 digest = keccak256(abi.encodePacked(_to, _value, _data, _nonce));
         bytes32 txHash = keccak256(abi.encodePacked(prefix,digest));
