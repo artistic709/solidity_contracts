@@ -99,6 +99,33 @@ contract personalWallet {
     function () public payable {
     }
 
+    // bytes4(keccak256("isValidSignature(bytes,bytes)")
+    bytes4 constant internal MAGICVALUE = 0x20c13b0b;
+    bytes4 constant internal FAILVALUE = 0xffffffff;
+
+    function isValidSignature(
+        bytes memory _data,
+        bytes memory _signature)
+        public view returns (bytes4 magicValue) {
+
+        bytes32 hash = keccak256(_data);
+
+        if (_signature.length != 65) return FAILVALUE;
+
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        assembly {
+            r := mload(add(_signature, 0x20))
+            s := mload(add(_signature, 0x40))
+            v := byte(0, mload(add(_signature, 0x60)))
+        }
+        
+        if(ecrecover(hash, v, r, s) == owner) return MAGICVALUE;
+        else return FAILVALUE;
+    }
+
 }
 
 contract personalWalletFactory {
